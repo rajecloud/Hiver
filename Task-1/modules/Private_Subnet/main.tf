@@ -24,18 +24,17 @@ resource "aws_nat_gateway" "nat_gw" {
 
 resource "aws_route_table" "private_rt" {
   vpc_id =var.vpc_id
-  route = []
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat_gw.id
+  }
+  tags = {
+    Name = "Private_Route"
+  }
   depends_on = [aws_nat_gateway.nat_gw]
 }
 
 resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.subnet.id
   route_table_id = aws_route_table.private_rt.id
-}
-
-resource "aws_route" "route1" {
-  route_table_id            = aws_route_table.private_rt.id
-  destination_cidr_block    = "0.0.0.0/0"
-  nat_gateway_id            = aws_nat_gateway.nat_gw.id
-  depends_on                = [aws_nat_gateway.nat_gw]
 }
